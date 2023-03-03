@@ -125,6 +125,90 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             }
         }
         
+        [TestMethod]
+        [UnitTest]
+        public void NullDirectoryThrows()
+        {
+            (var loader, _) = Setup(true);
+            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugin(null, out _));
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public async Task NullDirectoryThrowsAsync()
+        {
+            (var loader, _) = Setup(true);
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => loader.TryLoadPluginAsync(null));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void NullDirectoriesThrows()
+        {
+            (var loader, _) = Setup(true);
+            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugins(null, out _));
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public async Task NullDirectoriesThrowsAsync()
+        {
+            (var loader, _) = Setup(true);
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => loader.TryLoadPluginsAsync(null));
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public void NullDirectoryInDirectoriesThrows()
+        {
+            (var loader, _) = Setup(true);
+            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugins(new List<string>() { "foo", null }, out _));
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public async Task NullDirectoryInDirectoriesThrowsAsync()
+        {
+            (var loader, _) = Setup(true);
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => loader.TryLoadPluginsAsync(new List<string>() { "foo", null }));
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public void EmptyStringFailsToLoad()
+        {
+            (var loader, _) = Setup(true);
+            var success = loader.TryLoadPlugin(string.Empty, out _);
+            Assert.IsFalse(success);
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public async Task EmptyStringFailsToLoadAsync()
+        {
+            (var loader, _) = Setup(true);
+            var result = await loader.TryLoadPluginAsync(string.Empty);
+            Assert.IsFalse(result.Item1);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void EmptyDirectoriesLoads()
+        {
+            (var loader, _) = Setup(true);
+            var success = loader.TryLoadPlugins(new List<string>(), out _);
+            Assert.IsTrue(success);
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public async Task EmptyDirectoriesLoadsAsync()
+        {
+            (var loader, _) = Setup(true);
+            var result = await loader.TryLoadPluginsAsync(new List<string>());
+            Assert.IsTrue(result.Item1);
+        }
+        
         //
         // Invalid folder schema tests
         //
@@ -605,7 +689,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Subscribe(new MockPluginsConsumer()));
                 await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.SubscribeAsync(new MockPluginsConsumer()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugin(Any.FilePath(), out _));
-                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginAsync(new[] { Any.FilePath(), }));
+                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginAsync(Any.FilePath()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugins(new[] { Any.FilePath(), }, out _));
                 await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginsAsync(new[] { Any.FilePath(), }));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Unsubscribe(new MockPluginsConsumer()));

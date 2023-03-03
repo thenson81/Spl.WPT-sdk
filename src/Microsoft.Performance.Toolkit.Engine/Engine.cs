@@ -11,6 +11,7 @@ using System.Threading;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -639,6 +640,24 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Enables retrieval of cooker data associated with source parsers.
+        /// </summary>
+        /// <remarks>
+        ///     In most cases it is better to retrieve cooked data through the <see cref="RuntimeExecutionResults"/>
+        ///     returned from <see cref="Engine.Process"/>. In rare circumstances, there is some data made available
+        ///     prior to processing <see cref="IDataSource"/>s; this provides a mechanism for retrieval in such cases.
+        /// </remarks>
+        /// <returns>
+        ///     Custom data retrieval interfaces from custom data processors created by the engine that derive from
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </returns>
+        public IEnumerable<ISourceParserRetrieval> GetSourceParserRetrieval()
+        {
+            Debug.Assert(this.executors != null);
+            return this.executors.Select(e => e.Processor).OfType<ISourceParserRetrieval>();
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -679,7 +698,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.applicationEnvironment = null;
             this.workingDataSourceSet = null;
             this.internalDataSourceSet = null;
-            this.applicationEnvironment = null;
             this.tablesToProcessors = null;
             this.isDisposed = true;
         }
@@ -760,7 +778,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                     instance.Factory.CreateSourceSessionFactory(),
                     createInfo.IsInteractive
                         ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
-                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger));
+                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger))
+                {
+                    IsInteractive = createInfo.IsInteractive,
+                };
 
                 foreach (var cds in instance.ProcessingSourceReferences)
                 {
@@ -795,7 +816,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     instance.DataSourcesToProcess.FreeDataSourcesToProcess,
                     instance.DataSourcesToProcess.DataSourcesToProcess);
 
-                instance.executors = instance.CreateExecutors(allDataSourceAssociations);
+                instance.executors = instance.CreateExecutors(allDataSourceAssociations, createInfo.OptionsResolver);
 
                 instance.IsProcessed = false;
 
@@ -808,6 +829,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Returns custom data processors that derive from <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </summary>
+        /// <returns>
+        ///     Custom data processors created by the engine that derive from
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </returns>
         private IEnumerable<ICustomDataProcessorWithSourceParser> GetExtensibleProcessors()
         {
             Debug.Assert(this.executors != null);
@@ -954,7 +982,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         new ProcessingError(
                             executor.Context.ProcessingSource.Guid,
                             executor.Processor,
-                            executor.Context.DataSources,
+                            executor.Context.DataSourceGroup.DataSources,
                             e));
 
                     this.logger.Error($"Failed to process: {e}");
@@ -982,9 +1010,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         private List<ProcessingSourceExecutor> CreateExecutors(
-            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
+            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations,
+            IProcessingOptionsResolver optionsResolver)
         {
-            var executors = new List<ProcessingSourceExecutor>();
+            Debug.Assert(optionsResolver != null, $"{optionsResolver} should not be null");
+
+            var processingOptionsMap = new Dictionary<Tuple<ProcessingSourceReference, IDataSourceGroup>, ProcessorOptions>();
+
+            // Retrieve, validate, and cache processor options
+            bool optionsFailure = false;
             foreach (var kvp in allDataSourceAssociations)
             {
                 var processingSource = kvp.Key;
@@ -992,34 +1026,122 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 foreach (var dataSources in dataSourceLists)
                 {
+                    ProcessorOptions processorOptions = ProcessorOptions.Default;
+                    var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode()); // Todo #214
+                    
+                    // Retrieve processor options
                     try
                     {
-                        var executionContext = new SDK.Runtime.ExecutionContext(
-                            new DataProcessorProgress(),
-                            x => ConsoleLogger.Create(x.GetType()),
-                            processingSource,
-                            dataSources,
-                            processingSource.Instance.MetadataTables,
-                            new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
-                            ProcessorOptions.Default);
-
-                        var executor = new ProcessingSourceExecutor();
-                        executor.InitializeCustomDataProcessor(executionContext);
-
-                        executors.Add(executor);
+                        processorOptions = optionsResolver.GetProcessorOptions(processingSource.Guid, dsg);
                     }
                     catch (Exception e)
                     {
+                        optionsFailure = true;
                         this.logger.Error(
-                           "Error processing dataSources {0} on processing source {1}: {2}",
-                           dataSources.ToString(),
+                           "Unable to get processor options for processing source {0} and data sources {1}: {2}",
                            processingSource.Name,
+                           dsg.DataSources.ToString(),
                            e);
                     }
+
+                    // Validate processor options
+                    optionsFailure = AreUnsupportedOptions(processingSource, processorOptions, this.logger) || optionsFailure;
+
+                    // Cache processorOptions for each DataSourceGroup and ProcessingSource.
+                    var processingSourceDataSourceGroupPair = new Tuple<ProcessingSourceReference, IDataSourceGroup>(processingSource, dsg);
+                    processingOptionsMap[processingSourceDataSourceGroupPair] = processorOptions;
+                }
+            }
+
+            var executors = new List<ProcessingSourceExecutor>();
+            
+            // If unable to retrieve any options or invalid options, return early
+            if (optionsFailure)
+            {
+                this.logger.Error("Failed processor options.");
+                return executors;
+            }
+
+            foreach (var psDsgPair in processingOptionsMap)
+            {
+                var processingSource = psDsgPair.Key.Item1;
+                var dsg = psDsgPair.Key.Item2;
+                var processorOptions = psDsgPair.Value;
+
+                try
+                {
+                    /*
+                     * TODO (#214): for now, the engine ignores the groups returned by processing sources that implement
+                     * IDataSourceGrouper. In the future, this needs to
+                     * 1. Check if the processing source implements IDataSourceGrouper (which it must after V2)
+                     * 2. If not, do what we're doing now and just create a new DataSourceGroup with the default
+                     *     processing mode
+                     * 3. If yes, use an IDataSourceGroupResolver to pick out which of the IDataSourceGroup(s)
+                     *    returned by the processing source should be used for processing.
+                     *      a. If the engine user does not supply a resolver, a sensible one should be used. E.g.
+                     *         one that picks groups that maximize the number of data sources processed without a
+                     *         data source being processed in more than 1 group
+                     * 4. Add a new executor for each IDataSourceGroups picked out in the above step
+                     */
+
+                    var executionContext = new SDK.Runtime.ExecutionContext(
+                        new DataProcessorProgress(),
+                        x => ConsoleLogger.Create(x.GetType()),
+                        processingSource,
+                        dsg, // todo #214
+                        processingSource.Instance.MetadataTables,
+                        new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
+                        processorOptions);
+
+                    var executor = new ProcessingSourceExecutor();
+                    executor.InitializeCustomDataProcessor(executionContext);
+
+                    executors.Add(executor);
+                }
+                catch (Exception e)
+                {
+                    this.logger.Error(
+                       "Error processing dataSources {0} on processing source {1}: {2}",
+                       dsg.DataSources.ToString(),
+                       processingSource.Name,
+                       e);
                 }
             }
 
             return executors;
+        }
+
+        private static bool AreUnsupportedOptions(
+            ProcessingSourceReference processingSourceReference,
+            ProcessorOptions processorOptions, 
+            ILogger logger)
+        {
+            bool areUnsupportedOptions = false;
+
+            if (processorOptions is null)
+            {
+                logger.Warn($"Provided Processor options are null for ${processingSourceReference} (${processingSourceReference.Guid}).");
+                return true;
+            }
+
+            foreach (var optionInstance in processorOptions.Options)
+            {
+                if (optionInstance is null)
+                {
+                    areUnsupportedOptions = true;
+                    logger.Error($"Provided option instance is null for ${processingSourceReference} (${processingSourceReference.Guid}).");
+                    continue;
+                } 
+
+                if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(optionInstance.Id)))
+                {
+                    // Compare Option to every Option specified as supported by the processingSourceReference
+                    areUnsupportedOptions = true;
+                    logger.Error($"{optionInstance} is unsupported by ${processingSourceReference} (${processingSourceReference.Guid}).");
+                }
+            }
+
+            return areUnsupportedOptions;
         }
 
         private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(
