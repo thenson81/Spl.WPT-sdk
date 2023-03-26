@@ -378,6 +378,15 @@
         <member name="M:Microsoft.Performance.SDK.Bytes.GetHashCode">
             <inheritdoc />
         </member>
+        <member name="M:Microsoft.Performance.SDK.Bytes.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Bytes.ToString(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Bytes.ToString(System.String,System.IFormatProvider)">
+            <inheritdoc />
+        </member>
         <member name="M:Microsoft.Performance.SDK.Bytes.op_Subtraction(Microsoft.Performance.SDK.Bytes,Microsoft.Performance.SDK.Bytes)">
             <summary>
                 Subtracts two quantities of <see cref="T:Microsoft.Performance.SDK.Bytes"/> from
@@ -4928,6 +4937,15 @@
         <member name="M:Microsoft.Performance.SDK.LargeSignedBytes.GetHashCode">
             <inheritdoc />
         </member>
+        <member name="M:Microsoft.Performance.SDK.LargeSignedBytes.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.SDK.LargeSignedBytes.ToString(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.SDK.LargeSignedBytes.ToString(System.String,System.IFormatProvider)">
+            <inheritdoc />
+        </member>
         <member name="M:Microsoft.Performance.SDK.LargeSignedBytes.op_Subtraction(Microsoft.Performance.SDK.LargeSignedBytes,Microsoft.Performance.SDK.LargeSignedBytes)">
             <summary>
                 Subtracts two quantities of <see cref="T:Microsoft.Performance.SDK.LargeSignedBytes"/> from
@@ -6578,6 +6596,100 @@
                 <c>false</c> otherwise.
             </returns>
         </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.DataSourceGroup">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.DataSourceGrouping.DataSourceGroup.#ctor(System.Collections.Generic.IReadOnlyCollection{Microsoft.Performance.SDK.Processing.IDataSource},Microsoft.Performance.SDK.Processing.IProcessingMode)">
+            <summary>
+                Initializes a new instance of <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.DataSourceGroup"/>.
+            </summary>
+            <param name="dataSources">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>s in this group. This parameter may not be <c>null</c>.
+            </param>
+            <param name="processingMode">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingMode"/> that this group should be processed in. This parameter may not
+                be <c>null</c>.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dataSources"/> or <paramref name="processingMode"/> is <c>null</c>.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.DataSourceGrouping.DataSourceGroup.DataSources">
+            <inheritdoc/>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.DataSourceGrouping.DataSourceGroup.ProcessingMode">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup">
+            <summary>
+                A collection of <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>s that a <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/> can process together
+                in a specified <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingMode"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup.DataSources">
+            <summary>
+                Gets the <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>s in this group.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup.ProcessingMode">
+            <summary>
+                Gets the <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingMode"/> for this group.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGrouper">
+            <summary>
+                An (optional) interface that <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> instances can implement to specify how
+                its supported <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>s are capable of being grouped for processing.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGrouper.CreateValidGroups(System.Collections.Generic.IEnumerable{Microsoft.Performance.SDK.Processing.IDataSource},Microsoft.Performance.SDK.Processing.ProcessorOptions)">
+            <summary>
+                Groups the specified <paramref name="dataSources" /> into groups of <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>s that
+                can be processed together by a <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor" />.
+                <para />
+                The returned value must include every valid combination of <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource" />s in the given
+                <paramref name="dataSources" />.
+            </summary>
+            <param name="dataSources">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/> instances to be grouped. This will be every opened <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>
+                that the implementing <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> specified it can open.
+                <para />
+                Every <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/> inside a returned <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>'s
+                <see cref="P:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup.DataSources"/> property must be one of these instances.
+            </param>
+            <param name="options">
+                Options that will be passed to the implementing <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> for processing. This
+                can be used, for instance, to limit the types of <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>s that will be returned.
+            </param>
+            <returns>
+                All valid groups of <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>s given the specified <paramref name="options"/>. Every
+                <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/> inside a returned <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>'s <see cref="P:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup.DataSources"/>
+                property must be one of these instances.
+            </returns>
+        </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroupResolver">
+            <summary>
+                Responsible for choosing the <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/> instances that will be used for processing.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroupResolver.Resolve(System.Guid,System.Collections.Generic.IReadOnlyCollection{Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup})">
+            <summary>
+                Selects which <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>s to use for processing from <paramref name="allValidGroups"/>.
+                Each returned <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/> will be processed independently by a unique
+                <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>.
+            </summary>
+            <param name="processingSourceGuid">
+                The <see cref="T:System.Guid"/> of the <see cref="T:Microsoft.Performance.SDK.Processing.ProcessingSource"/> to resolve groups for.
+            </param>
+            <param name="allValidGroups">
+                All <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>s that can be processed by the <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>
+                created by the <see cref="T:Microsoft.Performance.SDK.Processing.ProcessingSource"/> with the specified <paramref name="processingSourceGuid"/>.
+            </param>
+            <returns>
+                The <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>s to use for processing. Each returned <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>
+                MUST be an instance from <paramref name="allValidGroups"/>.
+            </returns>
+        </member>
         <member name="T:Microsoft.Performance.SDK.Processing.DataSourceInfo">
             <summary>
                 Provides information about a data source, including the
@@ -6677,6 +6789,25 @@
                 Gets the wallclock time of the end of the time spanned by
                 this data source, in UTC.
             </summary>
+        </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.DefaultProcessingMode">
+            <summary>
+                A default <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingMode"/>.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Performance.SDK.Processing.DefaultProcessingMode.Id">
+            <summary>
+                Gets the <see cref="P:Microsoft.Performance.SDK.Processing.IProcessingMode.Guid"/> for the <see cref="T:Microsoft.Performance.SDK.Processing.DefaultProcessingMode"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.DefaultProcessingMode.Guid">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.DefaultProcessingMode.Name">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.DefaultProcessingMode.Description">
+            <inheritdoc />
         </member>
         <member name="T:Microsoft.Performance.SDK.Processing.DirectoryDataSource">
             <summary>
@@ -7450,15 +7581,20 @@
                 The <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/> of tables that have been enabled on this processor.
             </returns>
         </member>
-        <member name="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessorWithSourceParser">
+        <member name="T:Microsoft.Performance.SDK.Processing.ISourceParserRetrieval">
             <summary>
-                Wraps the ICustomDataProcessor with additional functionality required to operate with a
-                source parser and data extensions.
+                Provides access to data from a <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>'s source parser cookers.
             </summary>
         </member>
-        <member name="P:Microsoft.Performance.SDK.Processing.ICustomDataProcessorWithSourceParser.SourceParserId">
+        <member name="P:Microsoft.Performance.SDK.Processing.ISourceParserRetrieval.SourceParserId">
             <summary>
                 Source parser identifier
+            </summary>
+        </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessorWithSourceParser">
+            <summary>
+                Wraps the <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/> with additional functionality required to operate with a
+                source parser and data extensions.
             </summary>
         </member>
         <member name="M:Microsoft.Performance.SDK.Processing.ICustomDataProcessorWithSourceParser.EnableCooker(Microsoft.Performance.SDK.Extensibility.DataCooking.ISourceDataCookerFactory)">
@@ -7778,6 +7914,46 @@
                 to be <c>null</c>; false otherwise.
             </returns>
         </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.IProcessingMode">
+            <summary>
+                A mode of processing 1 or more <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource" />s in a single call to
+                <see cref="M:Microsoft.Performance.SDK.Processing.ICustomDataProcessor.ProcessAsync(System.IProgress{System.Int32},System.Threading.CancellationToken)" />.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.IProcessingMode.Guid">
+            <summary>
+                Gets a globally-unique identifier for this processing mode.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.IProcessingMode.Name">
+            <summary>
+                Gets the human-readable name of this processing mode.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.SDK.Processing.IProcessingMode.Description">
+            <summary>
+                Gets a human-readable description of this processing mode.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Performance.SDK.Processing.IProcessingOptionsResolver">
+            <summary>
+                Responsible for choosing the <see cref="T:Microsoft.Performance.SDK.Processing.ProcessorOptions"/> that will be used for processing.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.IProcessingOptionsResolver.GetProcessorOptions(System.Guid,Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup)">
+            <summary>
+                Get the <see cref="T:Microsoft.Performance.SDK.Processing.ProcessorOptions"/> for an <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/> processed by a <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>.
+            </summary>
+            <param name="processingSourceGuid"> Guid for a <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> to process the data sources. </param>
+            <param name="dataSourceGroup"> A group of data sources. </param>
+            <returns> 
+                The <see cref="T:Microsoft.Performance.SDK.Processing.ProcessorOptions"/> to pass to the <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> 
+                with the given <paramref name="processingSourceGuid"/> when it is asked to create an 
+                <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/> to process the given <paramref name="dataSourceGroup"/>.
+                
+                It is invalid to return <c>null</c>.
+            </returns>
+        </member>
         <member name="T:Microsoft.Performance.SDK.Processing.SerializationSource">
             <summary>
                 Enumerates the different sources of serialized table configuration
@@ -7852,6 +8028,9 @@
             <returns>
                 The created <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>.
             </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dataSource"/>, <paramref name="processorEnvironment"/>, or <paramref name="options"/> is <c>null</c>.
+            </exception>
         </member>
         <member name="M:Microsoft.Performance.SDK.Processing.IProcessingSource.CreateProcessor(System.Collections.Generic.IEnumerable{Microsoft.Performance.SDK.Processing.IDataSource},Microsoft.Performance.SDK.Processing.IProcessorEnvironment,Microsoft.Performance.SDK.Processing.ProcessorOptions)">
             <summary>
@@ -7869,6 +8048,33 @@
             <returns>
                 The created <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>.
             </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dataSources"/>, <paramref name="processorEnvironment"/>, or <paramref name="options"/> is <c>null</c>.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.IProcessingSource.CreateProcessor(Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup,Microsoft.Performance.SDK.Processing.IProcessorEnvironment,Microsoft.Performance.SDK.Processing.ProcessorOptions)">
+            <summary>
+                Creates a new processor for processing the specified data sources.
+            </summary>
+            <param name="dataSourceGroup">
+                The data source group to process.
+            </param>
+            <param name="processorEnvironment">
+                The environment for this specific processor instance.
+            </param>
+            <param name="options">
+                The command line options to pass to the processor.
+            </param>
+            <returns>
+                The created <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dataSourceGroup"/>, <paramref name="processorEnvironment"/>, or <paramref name="options"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:System.InvalidOperationException">
+                This <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> implements <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGrouper"/>, but does not provide a
+                valid a way to process a <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/>.
+            </exception>
         </member>
         <member name="M:Microsoft.Performance.SDK.Processing.IProcessingSource.GetSerializationStream(Microsoft.Performance.SDK.Processing.SerializationSource)">
             <summary>
@@ -8619,6 +8825,9 @@
                 Gets the arguments provided to this option.
             </summary>
         </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.OptionInstance.ToString">
+            <inheritdoc/>
+        </member>
         <member name="T:Microsoft.Performance.SDK.Processing.OptionInstanceExtensions">
             <summary>
                 Contains static (Shared in Visual Basic) methods for interacting
@@ -8832,6 +9041,9 @@
         <member name="M:Microsoft.Performance.SDK.Processing.ProcessingSource.CreateProcessor(System.Collections.Generic.IEnumerable{Microsoft.Performance.SDK.Processing.IDataSource},Microsoft.Performance.SDK.Processing.IProcessorEnvironment,Microsoft.Performance.SDK.Processing.ProcessorOptions)">
             <inheritdoc />
         </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.ProcessingSource.CreateProcessor(Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup,Microsoft.Performance.SDK.Processing.IProcessorEnvironment,Microsoft.Performance.SDK.Processing.ProcessorOptions)">
+            <inheritdoc />
+        </member>
         <member name="M:Microsoft.Performance.SDK.Processing.ProcessingSource.GetSerializationStream(Microsoft.Performance.SDK.Processing.SerializationSource)">
             <inheritdoc />
         </member>
@@ -8863,6 +9075,32 @@
                 to return <c>null</c> from this method.
             </returns>
         </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.ProcessingSource.CreateProcessorCore(Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup,Microsoft.Performance.SDK.Processing.IProcessorEnvironment,Microsoft.Performance.SDK.Processing.ProcessorOptions)">
+            <summary>
+                When implemented in a derived class, creates a new
+                instance implementing <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>
+                to process the specified <paramref name="dataSourceGroup"/>.
+            </summary>
+            <param name="dataSourceGroup">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGroup"/> to be processed by the processor.
+                This parameter is guaranteed to be non-null, and all
+                elements in the collection are guaranteed to be non-null.
+            </param>
+            <param name="processorEnvironment">
+                The environment for this specific processor instance.
+            </param>
+            <param name="options">
+                The options to pass to the processor.
+            </param>
+            <returns>
+                A new <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessor"/>. It is an error
+                to return <c>null</c> from this method.
+            </returns>
+            <exception cref="T:System.InvalidOperationException">
+                This <see cref="T:Microsoft.Performance.SDK.Processing.ProcessingSource"/> implements <see cref="T:Microsoft.Performance.SDK.Processing.DataSourceGrouping.IDataSourceGrouper"/>, but does not override
+                this method.
+            </exception>
+        </member>
         <member name="M:Microsoft.Performance.SDK.Processing.ProcessingSource.IsDataSourceSupportedCore(Microsoft.Performance.SDK.Processing.IDataSource)">
             <summary>
                 When overridden in a derived class, returns a value indicating whether the
@@ -8892,6 +9130,14 @@
             <param name="logger">
                 The <seealso cref="T:Microsoft.Performance.SDK.Processing.ILogger"/> used to log information.
             </param>
+        </member>
+        <member name="M:Microsoft.Performance.SDK.Processing.ProcessingSource.CreateTableProvider">
+            <summary>
+                A derived class may implement this to provide a custom <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSourceTableProvider"/>.
+            </summary>
+            <returns>
+                A table provider for the processing source.
+            </returns>
         </member>
         <member name="T:Microsoft.Performance.SDK.Processing.ProcessingSourceAttribute">
             <summary>
@@ -12417,6 +12663,15 @@
             <inheritdoc />
         </member>
         <member name="M:Microsoft.Performance.SDK.SignedBytes.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.SDK.SignedBytes.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.SDK.SignedBytes.ToString(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.SDK.SignedBytes.ToString(System.String,System.IFormatProvider)">
             <inheritdoc />
         </member>
         <member name="M:Microsoft.Performance.SDK.SignedBytes.op_Subtraction(Microsoft.Performance.SDK.SignedBytes,Microsoft.Performance.SDK.SignedBytes)">
