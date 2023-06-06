@@ -19,24 +19,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         [JsonConstructor]
         public AvailablePluginInfo(
-            PluginIdentity Identity,
-            PluginSource pluginSource,
+            PluginIdentity identity,
+            PluginSource source,
+            ulong packageSize,
+            ulong installedSize,
             string displayName,
             string description,
-            Uri pluginPackageUri,
+            Uri packageUri,
             Guid fetcherResourceId)
         {
-            Guard.NotNull(Identity, nameof(Identity));
-            Guard.NotNull(pluginSource, nameof(pluginSource));
+            Guard.NotNull(identity, nameof(identity));
+            Guard.NotNull(source, nameof(source));
             Guard.NotNullOrWhiteSpace(displayName, nameof(displayName));
             Guard.NotNull(description, nameof(description));
-            Guard.NotNull(pluginPackageUri, nameof(pluginPackageUri));
+            Guard.NotNull(packageUri, nameof(packageUri));
 
-            this.Identity = Identity;
-            this.Source = pluginSource;
+            this.Identity = identity;
+            this.Source = source;
+            this.PackageSize = packageSize;
+            this.InstalledSize = installedSize;
             this.DisplayName = displayName;
             this.Description = description;
-            this.PackageUri = pluginPackageUri;
+            this.PackageUri = packageUri;
             this.FetcherResourceId = fetcherResourceId;
         }
 
@@ -46,9 +50,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public PluginIdentity Identity { get; }
 
         /// <summary>
-        ///     Gets the souce where this plugin is discovered.
+        ///     Gets the source where this plugin is discovered.
         /// </summary>
         public PluginSource Source { get; }
+
+        /// <summary>
+        ///     Gets the size, in number of bytes, of the package that makes up this plugin.
+        /// </summary>
+        public ulong PackageSize { get; }
+
+        /// <summary>
+        ///     Gets the size, in number of bytes, of this plugin once it has been installed.
+        /// </summary>
+        public ulong InstalledSize { get; }
 
         /// <summary>
         ///     Gets the human-readable name of this plugin.
@@ -57,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
         /// <summary>
         ///     Gets the user friendly description of this plugin.
-        /// </summary>   
+        /// </summary>
         public string Description { get; }
 
         /// <summary>
@@ -66,7 +80,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public Uri PackageUri { get; }
 
         /// <summary>
-        ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resouce
+        ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resource
         ///     the plugin package should be fetched from.
         /// </summary>
         public Guid FetcherResourceId { get; }
@@ -92,6 +106,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
             return this.Identity.Equals(other.Identity)
                 && this.Source.Equals(other.Source)
+                && this.PackageSize.Equals(other.PackageSize)
+                && this.InstalledSize.Equals(other.InstalledSize)
                 && this.DisplayName.Equals(other.DisplayName, StringComparison.Ordinal)
                 && this.Description.Equals(other.Description, StringComparison.Ordinal)
                 && this.PackageUri.Equals(other.PackageUri)
@@ -104,6 +120,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             return HashCodeUtils.CombineHashCodeValues(
                 this.Identity.GetHashCode(),
                 this.Source.GetHashCode(),
+                this.PackageSize.GetHashCode(),
+                this.InstalledSize.GetHashCode(),
                 this.DisplayName.GetHashCode(),
                 this.Description.GetHashCode(),
                 this.PackageUri.GetHashCode(),
