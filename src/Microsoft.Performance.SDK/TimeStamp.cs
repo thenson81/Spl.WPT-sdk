@@ -25,8 +25,7 @@ namespace Microsoft.Performance.SDK
         private readonly long nanoseconds;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Timestamp"/>
-        ///     class.
+        ///     Initializes a new instance of the <see cref="Timestamp"/> class.
         /// </summary>
         /// <param name="nanoseconds">
         ///     The value of the timestamp in nanoseconds.
@@ -37,8 +36,7 @@ namespace Microsoft.Performance.SDK
         }
 
         /// <summary>
-        ///     Gets a <see cref="Timestamp"/> from the given
-        ///     quantity of nanoseconds.
+        ///     Gets a <see cref="Timestamp"/> from the given quantity of nanoseconds.
         /// </summary>
         /// <param name="nanoseconds">
         ///     The value in nanoseconds.

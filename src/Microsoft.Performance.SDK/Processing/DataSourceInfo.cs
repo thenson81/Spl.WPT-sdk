@@ -108,14 +108,12 @@ namespace Microsoft.Performance.SDK.Processing
         public DateTime FirstEventWallClockUtc { get; }
 
         /// <summary>
-        ///     Gets the collection of errors encountered while processing the
-        ///     data source.
+        ///     Gets the collection of errors encountered while processing the data source.
         /// </summary>
         public IList<ErrorInfo> Errors { get; }
 
         /// <summary>
-        ///     Gets the wallclock time of the beginning of the time spanned by
-        ///     this data source, in UTC.
+        ///     Gets the wallclock time of the beginning of the time spanned by this data source, in UTC.
         /// </summary>
         public DateTime StartWallClockUtc
         {
@@ -126,8 +124,7 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Gets the wallclock time of the end of the time spanned by
-        ///     this data source, in UTC.
+        ///     Gets the wallclock time of the end of the time spanned by this data source, in UTC.
         /// </summary>
         public DateTime EndWallClockUtc
         {
