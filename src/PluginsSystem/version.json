@@ -12,7 +12,8 @@
     "../",
     "!../SDK.sln",
     "!Microsoft.Performance.Toolkit.Plugins.Runtime.Tests",
-    "!Microsoft.Performance.Toolkit.Plugins.Core.Tests"
+    "!Microsoft.Performance.Toolkit.Plugins.Core.Tests",
+    "!Tools/"
   ],
   "cloudBuild": {
     "buildNumber": {
